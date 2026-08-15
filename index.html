@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電池の原理と反応式マスター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* カスタムスクロールバーなどの微調整 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        canvas { touch-action: none; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col">
+
+    <!-- ヘッダー -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                電池の原理と反応式マスター
+            </h1>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-grow w-full max-w-5xl mx-auto p-4 flex flex-col">
+        
+        <!-- タブナビゲーション -->
+        <div class="flex space-x-2 mb-6 border-b border-slate-300">
+            <button id="tab-learn" class="px-6 py-3 font-bold text-blue-600 border-b-4 border-blue-600 transition-colors focus:outline-none" onclick="switchTab('learn')">
+                原理を学ぶ (アニメーション)
+            </button>
+            <button id="tab-quiz" class="px-6 py-3 font-bold text-slate-500 border-b-4 border-transparent hover:text-blue-500 transition-colors focus:outline-none" onclick="switchTab('quiz')">
+                反応式クイズ
+            </button>
+        </div>
+
+        <!-- 学習モード (アニメーション) -->
+        <section id="section-learn" class="fade-in flex flex-col lg:flex-row gap-6">
+            <!-- コントロールパネル -->
+            <div class="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-6">
+                
+                <div>
+                    <h2 class="text-lg font-bold text-slate-700 mb-3 border-l-4 border-blue-500 pl-2">電池の種類</h2>
+                    <div class="flex flex-col gap-2">
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
+                            <input type="radio" name="batteryType" value="daniel" checked class="w-4 h-4 text-blue-600" onchange="changeBatteryType('daniel')">
+                            <span class="font-medium">ダニエル電池 (一次電池)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
+                            <input type="radio" name="batteryType" value="lead" class="w-4 h-4 text-blue-600" onchange="changeBatteryType('lead')">
+                            <span class="font-medium">鉛蓄電池 (二次電池)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
+                            <input type="radio" name="batteryType" value="lithium" class="w-4 h-4 text-blue-600" onchange="changeBatteryType('lithium')">
+                            <span class="font-medium">リチウムイオン電池 (二次電池)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
+                            <input type="radio" name="batteryType" value="fuel_phosphoric" class="w-4 h-4 text-blue-600" onchange="changeBatteryType('fuel_phosphoric')">
+                            <span class="font-medium">燃料電池 (リン酸型) (一次電池)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
+                            <input type="radio" name="batteryType" value="fuel_alkali" class="w-4 h-4 text-blue-600" onchange="changeBatteryType('fuel_alkali')">
+                            <span class="font-medium">燃料電池 (アルカリ型) (一次電池)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-lg font-bold text-slate-700 mb-3 border-l-4 border-orange-500 pl-2">状態の切り替え</h2>
+                    <div class="flex rounded-lg overflow-hidden border border-slate-300">
+                        <button id="btn-discharge" class="flex-1 py-2 font-bold bg-orange-100 text-orange-700 hover:bg-orange-200 transition" onclick="changeAction('discharge')">
+                            放電 (使う)
+                        </button>
+                        <button id="btn-charge" class="flex-1 py-2 font-bold bg-slate-100 text-slate-400 cursor-not-allowed transition" onclick="changeAction('charge')" disabled>
+                            充電 (貯める)
+                        </button>
+                    </div>
+                    <p id="charge-notice" class="text-xs text-slate-500 mt-2">※一次電池のため充電できません。</p>
+
+                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <span class="font-bold text-yellow-800">起電力(目安):</span>
+                        <span id="voltage-display" class="text-lg font-bold text-yellow-900 ml-2">約 1.1 V</span>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex-grow">
+                    <h3 class="font-bold text-blue-800 mb-2 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        現在の状態の解説
+                    </h3>
+                    <div id="explanation-text" class="text-sm text-slate-700 leading-relaxed">
+                        <!-- JSで動的に書き換え -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- キャンバスエリア -->
+            <div class="w-full lg:w-2/3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center">
+                <div class="relative w-full max-w-[600px] aspect-[3/2] bg-slate-50 rounded-xl overflow-hidden border border-slate-200 shadow-inner">
+                    <canvas id="batteryCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                </div>
+                <div class="mt-4 flex justify-between w-full max-w-[600px] px-8 text-sm font-bold text-slate-600">
+                    <div class="text-center">
+                        <span class="inline-block bg-slate-200 px-3 py-1 rounded-full mb-1">左側</span><br>
+                        <span class="text-lg text-blue-600" id="label-anode">負極 (-)</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="inline-block bg-slate-200 px-3 py-1 rounded-full mb-1">右側</span><br>
+                        <span class="text-lg text-red-600" id="label-cathode">正極 (+)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- クイズモード -->
+        <section id="section-quiz" class="fade-in hidden flex flex-col items-center py-8">
+            
+            <!-- スタート画面 -->
+            <div id="quiz-start-screen" class="w-full max-w-2xl bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">電池マスターへの道：総合クイズ</h2>
+                <p class="text-slate-600 mb-8 leading-relaxed">
+                    電池の仕組みや各電極での反応に関するクイズです。<br>
+                    全問正解を目指して頑張りましょう！
+                </p>
+                <div class="flex justify-center items-center gap-8 mb-8 text-lg">
+                    <div class="bg-blue-50 text-blue-800 px-6 py-4 rounded-2xl border border-blue-100 flex flex-col items-center min-w-[240px]">
+                        <span class="block text-sm text-blue-600 font-bold mb-1">あなたのハイスコア</span>
+                        <div>
+                            <span class="text-4xl font-black" id="display-highscore-score">0</span> <span class="text-sm">点</span>
+                        </div>
+                        <div class="text-sm mt-2 font-medium text-blue-700 bg-white px-4 py-1.5 rounded-full border border-blue-200 shadow-sm" id="display-highscore-detail">
+                            正答: 0/5問 | タイム: 0.0秒
+                        </div>
+                    </div>
+                </div>
+                <button onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-xl">
+                    クイズをスタート！
+                </button>
+            </div>
+
+            <!-- クイズプレイ画面 -->
+            <div id="quiz-play-screen" class="w-full max-w-2xl hidden flex flex-col gap-6">
+                <!-- ステータスバー -->
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="font-bold text-slate-500">
+                        問題 <span id="quiz-progress" class="text-blue-600 text-xl">1/10</span>
+                    </div>
+                    <div class="font-bold text-slate-500">
+                        スコア: <span id="quiz-current-score" class="text-orange-500 text-xl">0</span>
+                    </div>
+                </div>
+
+                <!-- 問題エリア -->
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="inline-block bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full text-sm mb-4">
+                        Question
+                    </div>
+                    <h3 id="quiz-question" class="text-xl md:text-2xl font-bold text-slate-800 mb-6 leading-relaxed">
+                        ダニエル電池の負極での反応式として正しいものはどれ？
+                    </h3>
+
+                    <!-- 選択肢 -->
+                    <div id="quiz-options" class="flex flex-col gap-3">
+                        <!-- JSで生成 -->
+                    </div>
+
+                    <!-- 解説エリア -->
+                    <div id="quiz-explanation-area" class="hidden mt-6 p-6 bg-blue-50 rounded-2xl border border-blue-200 fade-in">
+                        <div class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            解説
+                        </div>
+                        <p id="quiz-explanation-text" class="text-slate-700 leading-relaxed text-sm md:text-base font-medium"></p>
+                        <button id="btn-next-quiz" onclick="nextQuiz()" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all transform hover:-translate-y-0.5">
+                            次の問題へ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 結果画面 -->
+            <div id="quiz-result-screen" class="w-full max-w-2xl bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center hidden">
+                <h2 class="text-3xl font-bold text-slate-800 mb-2">クイズ結果</h2>
+                <div id="result-message" class="text-lg font-bold mb-6 text-blue-600">よく頑張りました！</div>
+                
+                <div class="flex justify-center items-center gap-6 mb-8">
+                    <div class="bg-slate-50 px-8 py-6 rounded-3xl border border-slate-200 w-full max-w-sm">
+                        <span class="block text-slate-500 font-bold mb-2">今回のスコア</span>
+                        <div class="text-5xl font-black text-slate-800 mb-2" id="result-score">0</div>
+                        <span class="text-slate-400 text-sm font-bold">/ 500 点</span>
+                        
+                        <div class="mt-4 pt-4 border-t border-slate-200 flex justify-around text-sm font-bold text-slate-600">
+                            <div>正答数: <span id="result-correct" class="text-xl text-blue-600">0</span>/5</div>
+                            <div>タイム: <span id="result-time" class="text-xl text-orange-500">0.0</span>秒</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="showQuizStart()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 px-8 rounded-full transition-colors mr-2">
+                    トップに戻る
+                </button>
+                <button onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition-colors">
+                    もう一度挑戦する
+                </button>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- アプリケーションロジック -->
+    <script>
+        // --- 状態管理 ---
+        const AppState = {
+            tab: 'learn',
+            batteryType: 'daniel', // 'daniel', 'lead', 'lithium', 'fuel_phosphoric', 'fuel_alkali'
+            action: 'discharge',   // 'discharge' or 'charge'
+            highScore: { score: 0, correctCount: 0, totalTime: 0 },
+            currentPlay: { score: 0, correctCount: 0, totalTime: 0 }
+        };
+
+        // --- UI制御 ---
+        function switchTab(tabId) {
+            AppState.tab = tabId;
+            
+            // タブの見た目変更
+            document.getElementById('tab-learn').className = tabId === 'learn' 
+                ? "px-6 py-3 font-bold text-blue-600 border-b-4 border-blue-600 transition-colors focus:outline-none" 
+                : "px-6 py-3 font-bold text-slate-500 border-b-4 border-transparent hover:text-blue-500 transition-colors focus:outline-none";
+            document.getElementById('tab-quiz').className = tabId === 'quiz' 
+                ? "px-6 py-3 font-bold text-blue-600 border-b-4 border-blue-600 transition-colors focus:outline-none" 
+                : "px-6 py-3 font-bold text-slate-500 border-b-4 border-transparent hover:text-blue-500 transition-colors focus:outline-none";
+
+            // セクションの表示切替
+            document.getElementById('section-learn').style.display = tabId === 'learn' ? 'flex' : 'none';
+            document.getElementById('section-quiz').style.display = tabId === 'quiz' ? 'flex' : 'none';
+
+            if(tabId === 'quiz') {
+                showQuizStart();
+            }
+        }
+
+        function changeBatteryType(type) {
+            AppState.batteryType = type;
+            
+            const btnCharge = document.getElementById('btn-charge');
+            const notice = document.getElementById('charge-notice');
+
+            if (type === 'daniel' || type.startsWith('fuel')) {
+                AppState.action = 'discharge'; // 強制的に放電に戻す
+                btnCharge.disabled = true;
+                btnCharge.className = "flex-1 py-2 font-bold bg-slate-100 text-slate-400 cursor-not-allowed transition";
+                notice.style.display = 'block';
+                updateActionButtons();
+            } else {
+                btnCharge.disabled = false;
+                notice.style.display = 'none';
+                updateActionButtons();
+            }
+            updateExplanation();
+            resetAnimationParticles();
+        }
+
+        function changeAction(action) {
+            if ((AppState.batteryType === 'daniel' || AppState.batteryType.startsWith('fuel')) && action === 'charge') return; 
+            AppState.action = action;
+            updateActionButtons();
+            updateExplanation();
+            resetAnimationParticles();
+        }
+
+        function updateActionButtons() {
+            const btnDis = document.getElementById('btn-discharge');
+            const btnCha = document.getElementById('btn-charge');
+
+            if (AppState.action === 'discharge') {
+                btnDis.className = "flex-1 py-2 font-bold bg-orange-100 text-orange-700 transition";
+                if(AppState.batteryType !== 'daniel' && !AppState.batteryType.startsWith('fuel')) {
+                    btnCha.className = "flex-1 py-2 font-bold bg-white text-slate-500 hover:bg-slate-50 transition";
+                }
+            } else {
+                btnDis.className = "flex-1 py-2 font-bold bg-white text-slate-500 hover:bg-slate-50 transition";
+                btnCha.className = "flex-1 py-2 font-bold bg-blue-100 text-blue-700 transition";
+            }
+        }
+
+        function updateExplanation() {
+            const expl = document.getElementById('explanation-text');
+            const labelA = document.getElementById('label-anode');
+            const labelC = document.getElementById('label-cathode');
+            const voltDisplay = document.getElementById('voltage-display');
+
+            if (AppState.batteryType === 'daniel') {
+                voltDisplay.innerText = "約 1.1 V";
+                labelA.innerHTML = "負極 (-)<br><span class='text-sm font-normal text-slate-500'>亜鉛(Zn)</span>";
+                labelC.innerHTML = "正極 (+)<br><span class='text-sm font-normal text-slate-500'>銅(Cu)</span>";
+                expl.innerHTML = `
+                    <p class="mb-2"><strong>ダニエル電池 (放電)</strong></p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>負極:</strong> <code>Zn → Zn²⁺ + 2e⁻</code></li>
+                        <li><strong>正極:</strong> <code>Cu²⁺ + 2e⁻ → Cu</code></li>
+                        <li><strong>全体:</strong> <code>Zn + Cu²⁺ → Zn²⁺ + Cu</code></li>
+                        <li><strong>イオンの移動:</strong> 負極からZn²⁺が生じて水溶液中へ移動し、正極には水溶液中のCu²⁺が近づき電子を受け取ります。また、SO₄²⁻は正極側から負極側へ、Zn²⁺の一部は負極側から正極側へ素焼き板を通って移動し、電気的なバランスを保ちます。</li>
+                    </ul>
+                `;
+            } else if (AppState.batteryType === 'lead') {
+                voltDisplay.innerText = "約 2.0 V / セル (自動車用は6セルで12V)";
+                labelA.innerHTML = "負極 (-)<br><span class='text-sm font-normal text-slate-500'>鉛(Pb)</span>";
+                labelC.innerHTML = "正極 (+)<br><span class='text-sm font-normal text-slate-500'>酸化鉛(IV)(PbO₂)</span>";
+                
+                if (AppState.action === 'discharge') {
+                    expl.innerHTML = `
+                        <p class="mb-2"><strong>鉛蓄電池 (放電時)</strong></p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>負極:</strong> <code>Pb + SO₄²⁻ → PbSO₄ + 2e⁻</code></li>
+                            <li><strong>正極:</strong> <code>PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O</code></li>
+                            <li><strong>全体:</strong> <code>Pb + PbO₂ + 2H₂SO₄ → 2PbSO₄ + 2H₂O</code></li>
+                            <li><strong>特徴:</strong> 放電が進むと両極の表面に硫酸鉛(PbSO₄)が付着します。また正極からは水(H₂O)が生じるため、電解液(希硫酸)の濃度が下がります。</li>
+                        </ul>
+                    `;
+                } else {
+                    expl.innerHTML = `
+                        <p class="mb-2"><strong>鉛蓄電池 (充電時)</strong></p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>負極:</strong> <code>PbSO₄ + 2e⁻ → Pb + SO₄²⁻</code></li>
+                            <li><strong>正極:</strong> <code>PbSO₄ + 2H₂O → PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻</code></li>
+                            <li><strong>全体:</strong> <code>2PbSO₄ + 2H₂O → Pb + PbO₂ + 2H₂SO₄</code></li>
+                            <li><strong>特徴:</strong> 外部電源から逆向きに電流を流します。正極に水が近づきH⁺とSO₄²⁻が生じ、負極からはSO₄²⁻が生じPbが現れます。電解液の濃度が回復します。</li>
+                        </ul>
+                    `;
+                }
+            } else if (AppState.batteryType === 'lithium') {
+                voltDisplay.innerText = "約 3.7 V";
+                labelA.innerHTML = "負極 (-)<br><span class='text-sm font-normal text-slate-500'>黒鉛 (C) 等</span>";
+                labelC.innerHTML = "正極 (+)<br><span class='text-sm font-normal text-slate-500'>コバルト酸リチウム 等</span>";
+                
+                if (AppState.action === 'discharge') {
+                    expl.innerHTML = `
+                        <p class="mb-2"><strong>リチウムイオン電池 (放電時)</strong></p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>負極:</strong> <code>LiC₆ → 6C + Li⁺ + e⁻</code> (※Cは黒鉛)</li>
+                            <li><strong>正極:</strong> <code>CoO₂ + Li⁺ + e⁻ → LiCoO₂</code></li>
+                            <li><strong>全体:</strong> <code>LiC₆ + CoO₂ → 6C + LiCoO₂</code></li>
+                            <li><strong>特徴:</strong> リチウムイオン(Li⁺)が正極と負極の間を行き来します。放電時は負極から正極へLi⁺が移動します。</li>
+                        </ul>
+                    `;
+                } else {
+                    expl.innerHTML = `
+                        <p class="mb-2"><strong>リチウムイオン電池 (充電時)</strong></p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>負極:</strong> <code>6C + Li⁺ + e⁻ → LiC₆</code></li>
+                            <li><strong>正極:</strong> <code>LiCoO₂ → CoO₂ + Li⁺ + e⁻</code></li>
+                            <li><strong>全体:</strong> <code>6C + LiCoO₂ → LiC₆ + CoO₂</code></li>
+                            <li><strong>特徴:</strong> 外部電源によって、正極からLi⁺が放出され、セパレーターを通過して負極の黒鉛の層間に再び蓄えられます。</li>
+                        </ul>
+                    `;
+                }
+            } else if (AppState.batteryType === 'fuel_phosphoric') {
+                voltDisplay.innerText = "約 1.2 V";
+                labelA.innerHTML = "負極 (-)<br><span class='text-sm font-normal text-slate-500'>Pt (白金)</span>";
+                labelC.innerHTML = "正極 (+)<br><span class='text-sm font-normal text-slate-500'>Pt (白金)</span>";
+                
+                expl.innerHTML = `
+                    <p class="mb-2"><strong>燃料電池 (リン酸型)</strong></p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>負極:</strong> <code>H₂ → 2H⁺ + 2e⁻</code></li>
+                        <li><strong>正極:</strong> <code>O₂ + 4H⁺ + 4e⁻ → 2H₂O</code></li>
+                        <li><strong>全体:</strong> <code>2H₂ + O₂ → 2H₂O</code></li>
+                        <li><strong>特徴:</strong> 両極の白金電極に対して外部から水素と酸素が供給されます。電解質を水素イオン(H⁺)が移動し、正極で反応して水(H₂O)が排出されます。</li>
+                    </ul>
+                `;
+            } else if (AppState.batteryType === 'fuel_alkali') {
+                voltDisplay.innerText = "約 1.2 V";
+                labelA.innerHTML = "負極 (-)<br><span class='text-sm font-normal text-slate-500'>Pt (白金)</span>";
+                labelC.innerHTML = "正極 (+)<br><span class='text-sm font-normal text-slate-500'>Pt (白金)</span>";
+                
+                expl.innerHTML = `
+                    <p class="mb-2"><strong>燃料電池 (アルカリ型)</strong></p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>負極:</strong> <code>H₂ + 2OH⁻ → 2H₂O + 2e⁻</code></li>
+                        <li><strong>正極:</strong> <code>O₂ + 2H₂O + 4e⁻ → 4OH⁻</code></li>
+                        <li><strong>全体:</strong> <code>2H₂ + O₂ → 2H₂O</code></li>
+                        <li><strong>特徴:</strong> 正極で生成した水酸化物イオン(OH⁻)が電解質中を移動します。負極側で水(H₂O)が生成・排出され、その一部が正極で消費されます。</li>
+                    </ul>
+                `;
+            }
+        }
+
+        // --- Canvas アニメーション制御 ---
+        const canvas = document.getElementById('batteryCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationId;
+        
+        // 描画用の内部スケール合わせ
+        function resizeCanvas() {
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // パーティクル（電子・イオン）の管理
+        let electrons = [];
+        let particles = [];
+        
+        function resetAnimationParticles() {
+            electrons = [];
+            initParticles();
+        }
+
+        function initParticles() {
+            particles = [];
+            const bType = AppState.batteryType;
+            const isCharge = AppState.action === 'charge';
+
+            if (bType === 'daniel') {
+                // 放電のみ: 負極からZn2+, 正極へCu2+, SO42-が素焼き板を通過
+                particles.push(new Particle('Zn²⁺', '#0ea5e9', 0.25, 0.5, 0.4, 0.7, 120));
+                particles.push(new Particle('Zn²⁺', '#0ea5e9', 0.25, 0.7, 0.4, 0.5, 150));
+                // 追加: 負極から素焼き板を通って正極へ移動するZn2+
+                particles.push(new Particle('Zn²⁺', '#0ea5e9', 0.25, 0.6, 0.65, 0.6, 220)); 
+                
+                particles.push(new Particle('Cu²⁺', '#0ea5e9', 0.6, 0.7, 0.75, 0.5, 130));
+                particles.push(new Particle('Cu²⁺', '#0ea5e9', 0.6, 0.5, 0.75, 0.7, 160));
+                
+                particles.push(new Particle('SO₄²⁻', '#ea580c', 0.7, 0.8, 0.3, 0.8, 200));
+                particles.push(new Particle('SO₄²⁻', '#ea580c', 0.6, 0.6, 0.4, 0.6, 180));
+            } else if (bType === 'lead') {
+                if (!isCharge) {
+                    // 放電: SO42-が両極へ、H+が正極へ、H2Oが正極から
+                    particles.push(new Particle('SO₄²⁻', '#ea580c', 0.4, 0.7, 0.25, 0.5, 140));
+                    particles.push(new Particle('SO₄²⁻', '#ea580c', 0.6, 0.7, 0.75, 0.5, 140));
+                    
+                    particles.push(new Particle('H⁺', '#dc2626', 0.5, 0.6, 0.75, 0.6, 120));
+                    particles.push(new Particle('H⁺', '#dc2626', 0.6, 0.8, 0.75, 0.4, 150));
+                    
+                    particles.push(new Particle('H₂O', '#3b82f6', 0.75, 0.5, 0.5, 0.8, 160));
+                } else {
+                    // 充電: H2Oが正極へ、H+, SO42-が正極から、SO42-が負極から
+                    particles.push(new Particle('H₂O', '#3b82f6', 0.5, 0.8, 0.75, 0.5, 160));
+                    
+                    particles.push(new Particle('H⁺', '#dc2626', 0.75, 0.6, 0.5, 0.6, 120));
+                    particles.push(new Particle('SO₄²⁻', '#ea580c', 0.75, 0.5, 0.6, 0.7, 140));
+                    
+                    particles.push(new Particle('SO₄²⁻', '#ea580c', 0.25, 0.5, 0.4, 0.7, 140));
+                }
+            } else if (bType === 'lithium') {
+                if (!isCharge) {
+                    particles.push(new Particle('Li⁺', '#8b5cf6', 0.35, 0.6, 0.55, 0.6, 120));
+                    particles.push(new Particle('Li⁺', '#8b5cf6', 0.35, 0.8, 0.55, 0.8, 140));
+                } else {
+                    particles.push(new Particle('Li⁺', '#8b5cf6', 0.55, 0.6, 0.35, 0.6, 120));
+                    particles.push(new Particle('Li⁺', '#8b5cf6', 0.55, 0.8, 0.35, 0.8, 140));
+                }
+            } else if (bType === 'fuel_phosphoric') {
+                // H2が負極外から負極(x=0.25)へ
+                particles.push(new Particle('H₂', '#64748b', 0.1, 0.6, 0.25, 0.6, 120));
+                particles.push(new Particle('H₂', '#64748b', 0.1, 0.8, 0.25, 0.8, 150));
+                
+                // O2が正極外から正極(x=0.7)へ
+                particles.push(new Particle('O₂', '#dc2626', 0.9, 0.6, 0.7, 0.6, 120));
+                particles.push(new Particle('O₂', '#dc2626', 0.9, 0.8, 0.7, 0.8, 150));
+                
+                // H+が負極(0.25)から正極(0.7)へ
+                particles.push(new Particle('H⁺', '#dc2626', 0.3, 0.5, 0.65, 0.5, 140));
+                particles.push(new Particle('H⁺', '#dc2626', 0.3, 0.7, 0.65, 0.7, 160));
+                
+                // H2Oが正極(0.7)付近から右下の排水口へ
+                particles.push(new Particle('H₂O', '#3b82f6', 0.725, 0.6, 0.775, 0.95, 140));
+            } else if (bType === 'fuel_alkali') {
+                // H2, O2の流入
+                particles.push(new Particle('H₂', '#64748b', 0.1, 0.6, 0.25, 0.6, 120));
+                particles.push(new Particle('H₂', '#64748b', 0.1, 0.8, 0.25, 0.8, 150));
+                particles.push(new Particle('O₂', '#dc2626', 0.9, 0.6, 0.7, 0.6, 120));
+                particles.push(new Particle('O₂', '#dc2626', 0.9, 0.8, 0.7, 0.8, 150));
+                
+                // OH-が正極(0.7)から負極(0.25)へ
+                particles.push(new Particle('OH⁻', '#3b82f6', 0.65, 0.5, 0.3, 0.5, 140));
+                particles.push(new Particle('OH⁻', '#3b82f6', 0.65, 0.7, 0.3, 0.7, 160));
+                
+                // H2Oが負極(0.25)付近から左下の排水口へ
+                particles.push(new Particle('H₂O', '#3b82f6', 0.275, 0.6, 0.225, 0.95, 140));
+            }
+        }
+
+        class Electron {
+            constructor(startX, startY, endX, endY, progress = 0) {
+                this.progress = progress; // 0.0 to 1.0
+                this.speed = 0.005;
+            }
+            update() {
+                this.progress += this.speed;
+                if (this.progress > 1) {
+                    this.progress = 0;
+                }
+            }
+            draw(ctx, w, h, isCharge, bType) {
+                let lx = 0.25, rx = 0.75;
+                if (bType === 'lithium') {
+                    lx = 0.39; rx = 0.61;
+                } else if (bType.startsWith('fuel')) {
+                    lx = 0.275; rx = 0.725;
+                }
+
+                // パス定義 (相対座標比率)
+                const path = [
+                    {x: lx, y: 0.5},   // 電極内
+                    {x: lx, y: 0.2},   // 電極上部
+                    {x: 0.5,  y: 0.2},   // 中央モーター
+                    {x: rx, y: 0.2},   // 右電極上部
+                    {x: rx, y: 0.5}    // 右電極内
+                ];
+
+                let p = this.progress;
+                if (isCharge) {
+                    p = 1.0 - p; // 逆再生
+                }
+
+                // 区分を求める (4区間)
+                const segment = Math.floor(p * 4);
+                const segP = (p * 4) - segment;
+                
+                let currentPoint = {x:0, y:0};
+                if(segment >= 4) {
+                    currentPoint = path[4];
+                } else {
+                    const p1 = path[segment];
+                    const p2 = path[segment + 1];
+                    currentPoint.x = p1.x + (p2.x - p1.x) * segP;
+                    currentPoint.y = p1.y + (p2.y - p1.y) * segP;
+                }
+
+                ctx.beginPath();
+                ctx.arc(currentPoint.x * w, currentPoint.y * h, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#fde047'; // yellow-300
+                ctx.fill();
+                ctx.strokeStyle = '#ca8a04'; // yellow-600
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                // e- 文字
+                ctx.fillStyle = '#854d0e'; // yellow-800
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('e⁻', currentPoint.x * w, currentPoint.y * h);
+            }
+        }
+
+        class Particle {
+            constructor(text, color, sx, sy, tx, ty, durationFrames) {
+                this.text = text;
+                this.color = color;
+                this.sx = sx;
+                this.sy = sy;
+                this.tx = tx;
+                this.ty = ty;
+                this.frames = durationFrames;
+                this.frame = Math.floor(Math.random() * durationFrames);
+            }
+            update() {
+                this.frame++;
+                if (this.frame > this.frames) {
+                    this.frame = 0;
+                }
+            }
+            draw(ctx, w, h) {
+                const p = this.frame / this.frames;
+                const x = this.sx + (this.tx - this.sx) * p;
+                const y = this.sy + (this.ty - this.sy) * p;
+                
+                // 両端10%でフェードイン/アウト
+                let alpha = 1.0;
+                if (p < 0.1) alpha = p / 0.1;
+                else if (p > 0.9) alpha = (1.0 - p) / 0.1;
+                
+                ctx.globalAlpha = alpha;
+
+                ctx.beginPath();
+                ctx.arc(x * w, y * h, 14, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.fill();
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = this.color;
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.text, x * w, y * h);
+                
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        function drawScene() {
+            if (!ctx) return;
+            const w = canvas.width;
+            const h = canvas.height;
+            const isCharge = AppState.action === 'charge';
+            const bType = AppState.batteryType;
+            const isFuel = bType.startsWith('fuel');
+
+            // クリア
+            ctx.clearRect(0, 0, w, h);
+
+            // --- 背景/ビーカー/電解質 ---
+            if (bType === 'daniel') {
+                ctx.fillStyle = '#e0f2fe'; // 水溶液
+                ctx.fillRect(w * 0.15, h * 0.4, w * 0.7, h * 0.5);
+                // ダニエルの素焼き板
+                ctx.beginPath();
+                ctx.moveTo(w * 0.5, h * 0.4);
+                ctx.lineTo(w * 0.5, h * 0.9);
+                ctx.strokeStyle = '#f59e0b'; // 素焼きのオレンジ色っぽく
+                ctx.setLineDash([8, 4]);
+                ctx.lineWidth = 6;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else if (bType === 'lead') {
+                ctx.fillStyle = '#f1f5f9'; 
+                ctx.fillRect(w * 0.15, h * 0.4, w * 0.7, h * 0.5);
+            } else if (bType === 'lithium') {
+                ctx.fillStyle = '#fdf4ff'; // 薄い紫(電解液イメージ)
+                ctx.fillRect(w * 0.15, h * 0.4, w * 0.7, h * 0.5);
+                // セパレータ
+                ctx.beginPath();
+                ctx.moveTo(w * 0.5, h * 0.4);
+                ctx.lineTo(w * 0.5, h * 0.9);
+                ctx.strokeStyle = '#d8b4fe'; 
+                ctx.setLineDash([4, 4]);
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else if (isFuel) {
+                ctx.fillStyle = '#f0fdf4'; // 薄い緑(電解質イメージ)
+                // 電解質は中央 0.3 ~ 0.7 の間
+                ctx.fillRect(w * 0.3, h * 0.4, w * 0.4, h * 0.5);
+                
+                // H2, O2の入り口イメージ
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('H₂ →', w * 0.1, h * 0.65);
+                ctx.fillText('← O₂', w * 0.9, h * 0.65);
+                
+                ctx.fillStyle = '#3b82f6';
+                ctx.font = 'bold 12px sans-serif';
+                if (bType === 'fuel_phosphoric') {
+                    // 正極側から排出
+                    ctx.fillText('H₂O ↓', w * 0.775, h * 0.96);
+                } else {
+                    // アルカリ型は負極側から排出
+                    ctx.fillText('H₂O ↓', w * 0.225, h * 0.96);
+                }
+            }
+
+            // 電解質中のイオン表示(背景として固定描画)
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            if (bType === 'daniel') {
+                ctx.fillStyle = 'rgba(14, 165, 233, 0.4)'; // Zn2+, Cu2+
+                ctx.fillText('Zn²⁺', w * 0.35, h * 0.5);
+                ctx.fillText('Cu²⁺', w * 0.65, h * 0.5);
+                ctx.fillStyle = 'rgba(234, 88, 12, 0.4)'; // SO42-
+                ctx.fillText('SO₄²⁻', w * 0.35, h * 0.7);
+                ctx.fillText('SO₄²⁻', w * 0.65, h * 0.7);
+            } else if (bType === 'lead') {
+                ctx.fillStyle = 'rgba(220, 38, 38, 0.4)'; // H+
+                ctx.fillText('H⁺', w * 0.4, h * 0.5);
+                ctx.fillText('H⁺', w * 0.6, h * 0.6);
+                ctx.fillStyle = 'rgba(234, 88, 12, 0.4)'; // SO42-
+                ctx.fillText('SO₄²⁻', w * 0.4, h * 0.7);
+                ctx.fillText('SO₄²⁻', w * 0.6, h * 0.8);
+            } else if (bType === 'lithium') {
+                ctx.fillStyle = 'rgba(71, 85, 105, 0.4)'; // 電解液の説明のみ
+                ctx.fillText('電解液(有機溶媒)', w * 0.5, h * 0.85);
+            } else if (bType === 'fuel_phosphoric') {
+                ctx.fillStyle = 'rgba(220, 38, 38, 0.4)'; // H+
+                ctx.fillText('H⁺', w * 0.4, h * 0.5);
+                ctx.fillText('H⁺', w * 0.6, h * 0.7);
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.4)'; // 電解質
+                ctx.fillText('リン酸水溶液など', w * 0.5, h * 0.85);
+            } else if (bType === 'fuel_alkali') {
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.4)'; // OH-
+                ctx.fillText('OH⁻', w * 0.4, h * 0.7);
+                ctx.fillText('OH⁻', w * 0.6, h * 0.5);
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.4)'; // 電解質
+                ctx.fillText('水酸化カリウム水溶液', w * 0.5, h * 0.85);
+            }
+
+            // 容器の枠(ビーカー or 燃料電池用セル)
+            ctx.beginPath();
+            if (!isFuel) {
+                ctx.moveTo(w * 0.15, h * 0.3);
+                ctx.lineTo(w * 0.15, h * 0.9);
+                ctx.lineTo(w * 0.85, h * 0.9);
+                ctx.lineTo(w * 0.85, h * 0.3);
+            } else {
+                // 左側の枠 (水素の部屋)
+                ctx.moveTo(w * 0.15, h * 0.4); 
+                // 水素の入り口 (h*0.5 ~ h*0.7を開ける)
+                ctx.lineTo(w * 0.15, h * 0.5); 
+                ctx.moveTo(w * 0.15, h * 0.7);
+                ctx.lineTo(w * 0.15, h * 0.9); 
+                
+                // 底辺の排出口を作る(0.2 ~ 0.25)
+                ctx.lineTo(w * 0.2, h * 0.9);
+                ctx.moveTo(w * 0.25, h * 0.9);
+                ctx.lineTo(w * 0.3, h * 0.9); 
+                ctx.lineTo(w * 0.3, h * 0.4);
+                
+                // 上部の口
+                ctx.moveTo(w * 0.15, h * 0.4); ctx.lineTo(w * 0.2, h * 0.4);
+                ctx.moveTo(w * 0.25, h * 0.4); ctx.lineTo(w * 0.3, h * 0.4);
+                
+                // 中央の枠 (電解質)
+                ctx.moveTo(w * 0.3, h * 0.9); ctx.lineTo(w * 0.7, h * 0.9);
+                
+                // 右側の枠 (酸素の部屋)
+                ctx.moveTo(w * 0.7, h * 0.4);
+                ctx.lineTo(w * 0.7, h * 0.9);
+                
+                // 底辺の排出口を作る(0.75 ~ 0.8)
+                ctx.lineTo(w * 0.75, h * 0.9);
+                ctx.moveTo(w * 0.8, h * 0.9);
+                ctx.lineTo(w * 0.85, h * 0.9); 
+                
+                // 酸素の入り口 (h*0.5 ~ h*0.7を開ける)
+                ctx.lineTo(w * 0.85, h * 0.7);
+                ctx.moveTo(w * 0.85, h * 0.5);
+                ctx.lineTo(w * 0.85, h * 0.4);
+
+                // 上部の口
+                ctx.moveTo(w * 0.7, h * 0.4); ctx.lineTo(w * 0.75, h * 0.4);
+                ctx.moveTo(w * 0.8, h * 0.4); ctx.lineTo(w * 0.85, h * 0.4);
+
+                // 左排水路
+                ctx.moveTo(w * 0.2, h * 0.9); ctx.lineTo(w * 0.2, h * 1.0);
+                ctx.moveTo(w * 0.25, h * 0.9); ctx.lineTo(w * 0.25, h * 1.0);
+
+                // 右排水路
+                ctx.moveTo(w * 0.75, h * 0.9); ctx.lineTo(w * 0.75, h * 1.0);
+                ctx.moveTo(w * 0.8, h * 0.9); ctx.lineTo(w * 0.8, h * 1.0);
+            }
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // 導線のX座標を電極の中心に合わせるための設定
+            let wireLx = w * 0.25;
+            let wireRx = w * 0.75;
+            if (bType === 'lithium') {
+                wireLx = w * 0.39;
+                wireRx = w * 0.61;
+            } else if (isFuel) {
+                wireLx = w * 0.275;
+                wireRx = w * 0.725;
+            }
+
+            // --- 導線 ---
+            ctx.beginPath();
+            ctx.moveTo(wireLx, h * 0.4);
+            ctx.lineTo(wireLx, h * 0.2);
+            ctx.lineTo(wireRx, h * 0.2);
+            ctx.lineTo(wireRx, h * 0.4);
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // --- 外部機器 (モーター or 電源) ---
+            ctx.beginPath();
+            ctx.arc(w * 0.5, h * 0.2, 25, 0, Math.PI * 2);
+            ctx.fillStyle = isCharge ? '#f87171' : '#fbbf24'; // 赤(電源) or 黄色(電球/モーター)
+            ctx.fill();
+            ctx.strokeStyle = isCharge ? '#b91c1c' : '#b45309';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (isCharge) {
+                ctx.fillText('外部電源', w * 0.5, h * 0.2);
+                // 充電時の外部電源の極性
+                ctx.fillStyle = '#1e293b';
+                ctx.fillText('(-)', w * 0.5 - 40, h * 0.15);
+                ctx.fillText('(+)', w * 0.5 + 40, h * 0.15);
+            } else {
+                ctx.fillText('負荷', w * 0.5, h * 0.2);
+                // 光の表現
+                ctx.beginPath();
+                ctx.arc(w * 0.5, h * 0.2, 35, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(253, 224, 71, 0.3)';
+                ctx.fill();
+            }
+
+            // 電極上部の (+) (-) 表示
+            ctx.fillStyle = '#ef4444'; // 赤
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText('(+)', wireRx, h * 0.12); // 正極
+            ctx.fillStyle = '#3b82f6'; // 青
+            ctx.fillText('(-)', wireLx, h * 0.12); // 負極
+
+
+            // --- 電極 ---
+            let leftRectX = w * 0.2, leftRectW = w * 0.1;
+            let rightRectX = w * 0.7, rightRectW = w * 0.1;
+            let rectY = h * 0.35;
+            let rectH = h * 0.45;
+
+            if (bType === 'lithium') {
+                leftRectX = w * 0.3; leftRectW = w * 0.18;
+                rightRectX = w * 0.52; rightRectW = w * 0.18;
+            } else if (isFuel) {
+                // 電解質の境界(0.3, 0.7)のやや内側に配置
+                leftRectX = w * 0.25; leftRectW = w * 0.05;
+                rightRectX = w * 0.7; rightRectW = w * 0.05;
+                rectH = h * 0.55; // 底(h*0.9)まで伸ばす
+            }
+
+            // 左(負極)の色分け
+            if(bType === 'daniel') ctx.fillStyle = '#94a3b8'; // Zn
+            else if(bType === 'lead') ctx.fillStyle = '#64748b'; // Pb
+            else if(bType === 'lithium') ctx.fillStyle = '#334155'; // 黒鉛
+            else if(isFuel) ctx.fillStyle = '#94a3b8'; // Ptなど
+            ctx.fillRect(leftRectX, rectY, leftRectW, rectH);
+            
+            // 右(正極)の色分け
+            if(bType === 'daniel') ctx.fillStyle = '#b45309'; // Cu
+            else if(bType === 'lead') ctx.fillStyle = '#334155'; // PbO2
+            else if(bType === 'lithium') ctx.fillStyle = '#4f46e5'; // LiCoO2
+            else if(isFuel) ctx.fillStyle = '#94a3b8'; // Ptなど
+            ctx.fillRect(rightRectX, rectY, rightRectW, rectH);
+
+            // 鉛蓄電池の表面変化(アニメーション)
+            if (bType === 'lead') {
+                const cycleTime = 4000;
+                let progress = (Date.now() % cycleTime) / cycleTime; // 0.0 to 1.0
+                
+                if (!isCharge) {
+                    // 放電：下から上へ徐々にPbSO4(白)が付着
+                    ctx.fillStyle = `rgba(248, 250, 252, 0.8)`;
+                    ctx.fillRect(w * 0.19, rectY + rectH * (1-progress), w * 0.12, rectH * progress);
+                    ctx.fillRect(w * 0.69, rectY + rectH * (1-progress), w * 0.12, rectH * progress);
+                    
+                    if(progress > 0.5) {
+                        ctx.fillStyle = '#1e293b'; // 文字色を黒っぽく
+                        ctx.font = 'bold 10px sans-serif';
+                        ctx.fillText('PbSO₄付着', w * 0.25, h * 0.8 - h * 0.3 * progress);
+                        ctx.fillText('PbSO₄付着', w * 0.75, h * 0.8 - h * 0.3 * progress);
+                    }
+                } else {
+                    // 充電：全体を覆っているPbSO4(白濁色)が徐々に透明になっていく
+                    const alpha = 0.8 * (1 - progress);
+                    ctx.fillStyle = `rgba(248, 250, 252, ${alpha})`;
+                    ctx.fillRect(w * 0.19, rectY, w * 0.12, rectH);
+                    ctx.fillRect(w * 0.69, rectY, w * 0.12, rectH);
+
+                    if(progress > 0.3) {
+                        ctx.fillStyle = '#ef4444'; // 赤色などで見やすく
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.fillText('Pb生成', w * 0.25, h * 0.5 + h * 0.2 * progress); 
+                        ctx.fillText('PbO₂生成', w * 0.75, h * 0.5 + h * 0.2 * progress); 
+                    }
+                }
+            }
+
+            // --- 電極のラベル ---
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 16px sans-serif';
+            let leftLabel = '', rightLabel = '';
+            if (bType === 'daniel') { leftLabel = 'Zn'; rightLabel = 'Cu'; }
+            else if (bType === 'lead') {
+                if (isCharge) { leftLabel = 'PbSO₄'; rightLabel = 'PbSO₄'; } 
+                else { leftLabel = 'Pb'; rightLabel = 'PbO₂'; }
+            }
+            else if (bType === 'lithium') { leftLabel = 'C'; rightLabel = 'LiCoO₂'; }
+            else if (isFuel) { leftLabel = 'Pt'; rightLabel = 'Pt'; }
+
+            ctx.fillText(leftLabel, wireLx, h * 0.55);
+            
+            if (bType === 'lithium') {
+                ctx.font = 'bold 12px sans-serif';
+            }
+            ctx.fillText(rightLabel, wireRx, h * 0.55);
+
+            // --- イオンの管理と描画 ---
+            if (particles.length === 0) {
+                initParticles();
+            }
+            particles.forEach(p => {
+                p.update();
+                p.draw(ctx, w, h);
+            });
+
+            // --- 電子の管理と描画 ---
+            if (electrons.length < 5) {
+                // 等間隔で追加
+                if(electrons.length === 0 || electrons[electrons.length-1].progress > 0.2) {
+                    electrons.push(new Electron(0,0,0,0, 0));
+                }
+            }
+            electrons.forEach(e => {
+                e.update();
+                e.draw(ctx, w, h, isCharge, bType);
+            });
+        }
+
+        function animate() {
+            drawScene();
+            animationId = requestAnimationFrame(animate);
+        }
+
+
+        // --- クイズロジック ---
+        const QuizData = [
+            {
+                q: "ダニエル電池の負極(亜鉛板)で起こる反応式として正しいものは？",
+                options: ["Zn → Zn²⁺ + 2e⁻", "Zn²⁺ + 2e⁻ → Zn", "Cu → Cu²⁺ + 2e⁻", "Cu²⁺ + 2e⁻ → Cu"],
+                ans: 0,
+                exp: "ダニエル電池の負極では、イオン化傾向が銅より大きい亜鉛(Zn)が電子を失って酸化され、亜鉛イオン(Zn²⁺)として溶け出します。"
+            },
+            {
+                q: "ダニエル電池の正極(銅板)で起こる反応式として正しいものは？",
+                options: ["Zn → Zn²⁺ + 2e⁻", "Zn²⁺ + 2e⁻ → Zn", "Cu → Cu²⁺ + 2e⁻", "Cu²⁺ + 2e⁻ → Cu"],
+                ans: 3,
+                exp: "正極では、負極から導線を通ってきた電子(e⁻)を水溶液中の銅イオン(Cu²⁺)が受け取り、還元されて銅(Cu)が析出します。"
+            },
+            {
+                q: "ダニエル電池における「素焼き板(またはセロハン)」の役割として適切でないものはどれ？",
+                options: ["両極の水溶液がすぐに混ざり合うのを防ぐ", "イオンを通過させ、電気的なバランスを保つ", "電子を通過させ、回路を形成する", "Zn²⁺やSO₄²⁻が通過できる"],
+                ans: 2,
+                exp: "素焼き板はイオンを通過させて電気的なバランスを保ちますが、電子(e⁻)は通過しません。電子は外部の導線を通って移動します。"
+            },
+            {
+                q: "ダニエル電池の負極である亜鉛(Zn)を、よりイオン化傾向の大きいマグネシウム(Mg)に変更した場合、電池の起電力はどうなる？",
+                options: ["大きくなる", "小さくなる", "変わらない", "電池として働かなくなる"],
+                ans: 0,
+                exp: "両極の金属のイオン化傾向の差が大きいほど、電池の起電力は大きくなります。MgはZnよりイオン化傾向が大きいため、正極(Cu)との差が広がり起電力は大きくなります。"
+            },
+            {
+                q: "ダニエル電池の正極である銅(Cu)を、よりイオン化傾向の小さい銀(Ag)に変更した場合、電池の起電力はどうなる？",
+                options: ["大きくなる", "小さくなる", "変わらない", "電池として働かなくなる"],
+                ans: 0,
+                exp: "両極の金属のイオン化傾向の差が大きいほど、起電力は大きくなります。AgはCuよりイオン化傾向が小さいため、負極(Zn)との差が広がり起電力は大きくなります。"
+            },
+            {
+                q: "鉛蓄電池の正極活物質(反応する物質)はどれ？",
+                options: ["Pb (鉛)", "PbO₂ (酸化鉛)", "PbSO₄ (硫酸鉛)", "H₂SO₄ (硫酸)"],
+                ans: 1,
+                exp: "鉛蓄電池の正極活物質は酸化鉛(IV)(PbO₂)です。放電時にはこれが還元されて硫酸鉛(II)(PbSO₄)になります。"
+            },
+            {
+                q: "鉛蓄電池の負極活物質(反応する物質)はどれ？",
+                options: ["PbO₂ (酸化鉛)", "Pb (鉛)", "PbSO₄ (硫酸鉛)", "H₂SO₄ (硫酸)"],
+                ans: 1,
+                exp: "鉛蓄電池の負極は鉛(Pb)、正極は酸化鉛(IV)(PbO₂)です。放電すると両極とも硫酸鉛(II)(PbSO₄)に変化します。"
+            },
+            {
+                q: "鉛蓄電池の放電時、正極で起こる反応式(の一部)として正しいものは？",
+                options: [
+                    "Pb + SO₄²⁻ → PbSO₄ + 2e⁻",
+                    "PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O",
+                    "PbSO₄ + 2e⁻ → Pb + SO₄²⁻",
+                    "PbSO₄ + 2H₂O → PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻"
+                ],
+                ans: 1,
+                exp: "正極では酸化鉛(PbO₂)が電子を受け取って還元され、水溶液中のH⁺やSO₄²⁻と反応してPbSO₄と水(H₂O)を生成します。"
+            },
+            {
+                q: "鉛蓄電池の放電時、負極で起こる反応式として正しいものは？",
+                options: [
+                    "Pb + SO₄²⁻ → PbSO₄ + 2e⁻",
+                    "PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O",
+                    "PbSO₄ + 2e⁻ → Pb + SO₄²⁻",
+                    "PbSO₄ + 2H₂O → PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻"
+                ],
+                ans: 0,
+                exp: "負極では鉛(Pb)が電子を放出して酸化され、硫酸イオン(SO₄²⁻)と結合して水に不溶な硫酸鉛(PbSO₄)になります。"
+            },
+            {
+                q: "鉛蓄電池を放電し続けたときの、電解液(希硫酸)の変化として正しいものは？",
+                options: ["水が生成され、濃度が小さくなる", "水が消費され、濃度が大きくなる", "硫酸が生成され、濃度が大きくなる", "濃度は変化しない"],
+                ans: 0,
+                exp: "放電時、正極の反応で水(H₂O)が生成されるとともに、硫酸イオンが消費されて硫酸鉛(PbSO₄)となるため、電解液(希硫酸)の濃度は小さくなります。"
+            },
+            {
+                q: "鉛蓄電池を充電する際、外部電源の負極(-)は、鉛蓄電池のどちらの極に繋ぐべき？",
+                options: ["正極(PbO₂側)", "負極(Pb側)", "どちらでもよい", "充電はできない"],
+                ans: 1,
+                exp: "充電とは逆向きに電流を流す操作です。外部電源の負極(-)から電子を強制的に送り込むため、元の負極(放電時に電子を出した極)に繋ぎます。"
+            },
+            {
+                q: "鉛蓄電池を充電する際、外部電源の正極(+)は、鉛蓄電池のどちらの極に繋ぐべき？",
+                options: ["負極(Pb側)", "正極(PbO₂側)", "どちらでもよい", "充電はできない"],
+                ans: 1,
+                exp: "充電時、外部電源の正極(+)は、鉛蓄電池の正極(放電時に電子を受け取った極)に繋いで電子を引き抜きます。"
+            },
+            {
+                q: "鉛蓄電池の充電時、負極で起こる反応式として正しいものは？",
+                options: [
+                    "PbSO₄ + 2e⁻ → Pb + SO₄²⁻",
+                    "PbSO₄ + 2H₂O → PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻",
+                    "Pb + SO₄²⁻ → PbSO₄ + 2e⁻",
+                    "PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O"
+                ],
+                ans: 0,
+                exp: "充電時は放電時と逆の反応が起こります。負極では硫酸鉛(PbSO₄)が電子を受け取って還元され、元の鉛(Pb)に戻ります。"
+            },
+            {
+                q: "鉛蓄電池の充電時、正極で起こる反応式として正しいものは？",
+                options: [
+                    "PbSO₄ + 2e⁻ → Pb + SO₄²⁻",
+                    "PbSO₄ + 2H₂O → PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻",
+                    "Pb + SO₄²⁻ → PbSO₄ + 2e⁻",
+                    "PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O"
+                ],
+                ans: 1,
+                exp: "充電時は放電時と逆の反応が起こります。正極では硫酸鉛(PbSO₄)が電子を奪われて酸化され、元の酸化鉛(PbO₂)に戻ります。"
+            },
+            {
+                q: "リチウムイオン電池の放電時、負極で起こる反応式として正しいものは？ (Cは黒鉛とする)",
+                options: ["LiC₆ → 6C + Li⁺ + e⁻", "6C + Li⁺ + e⁻ → LiC₆", "LiCoO₂ → CoO₂ + Li⁺ + e⁻", "CoO₂ + Li⁺ + e⁻ → LiCoO₂"],
+                ans: 0,
+                exp: "放電時の負極では、黒鉛の層間に蓄えられたリチウムが電子を放出して酸化され、リチウムイオン(Li⁺)となります。"
+            },
+            {
+                q: "リチウムイオン電池の放電時、正極で起こる反応式として正しいものは？",
+                options: ["LiC₆ → 6C + Li⁺ + e⁻", "6C + Li⁺ + e⁻ → LiC₆", "LiCoO₂ → CoO₂ + Li⁺ + e⁻", "CoO₂ + Li⁺ + e⁻ → LiCoO₂"],
+                ans: 3,
+                exp: "放電時の正極では、コバルト酸リチウム(CoO₂)などが、電解液を通ってきたLi⁺と導線を通ってきた電子を受け取って還元されます。"
+            },
+            {
+                q: "リチウムイオン電池の放電時における、リチウムイオン(Li⁺)の移動の仕方として正しいものは？",
+                options: ["負極から正極へ移動する", "正極から負極へ移動する", "両極間を移動しない", "外部の導線を通って移動する"],
+                ans: 0,
+                exp: "放電時は負極でLi⁺が生じて電解液中へ放出され、セパレーターを通過して正極へ移動し、正極に取り込まれます。充電時はその逆です。"
+            },
+            {
+                q: "燃料電池(アルカリ型)の負極で起こる反応式として正しいものは？",
+                options: ["H₂ → 2H⁺ + 2e⁻", "O₂ + 2H₂O + 4e⁻ → 4OH⁻", "H₂ + 2OH⁻ → 2H₂O + 2e⁻", "O₂ + 4H⁺ + 4e⁻ → 2H₂O"],
+                ans: 2,
+                exp: "アルカリ型の燃料電池の負極(水素極)では、水素(H₂)と電解液中の水酸化物イオン(OH⁻)が反応して水(H₂O)となり、電子を放出します。"
+            },
+            {
+                q: "燃料電池(アルカリ型)の正極で起こる反応式として正しいものは？",
+                options: ["O₂ + 2H₂O + 4e⁻ → 4OH⁻", "H₂ + 2OH⁻ → 2H₂O + 2e⁻", "O₂ + 4H⁺ + 4e⁻ → 2H₂O", "2H⁺ + 2e⁻ → H₂"],
+                ans: 0,
+                exp: "アルカリ型の燃料電池の正極(酸素極)では、酸素(O₂)が水(H₂O)と電子(e⁻)を受け取り、水酸化物イオン(OH⁻)を生成します。"
+            },
+            {
+                q: "燃料電池(リン酸型など)の負極で起こる反応式として正しいものは？",
+                options: ["O₂ + 4H⁺ + 4e⁻ → 2H₂O", "H₂ → 2H⁺ + 2e⁻", "2H₂O → O₂ + 4H⁺ + 4e⁻", "2H⁺ + 2e⁻ → H₂"],
+                ans: 1,
+                exp: "燃料電池の負極(燃料極)には水素(H₂)が供給され、白金などの触媒上で水素が酸化されてH⁺となり、電子を放出します。"
+            },
+            {
+                q: "燃料電池(リン酸型など)の正極で起こる反応式として正しいものは？",
+                options: ["O₂ + 4H⁺ + 4e⁻ → 2H₂O", "H₂ → 2H⁺ + 2e⁻", "2H₂O → O₂ + 4H⁺ + 4e⁻", "2H⁺ + 2e⁻ → H₂"],
+                ans: 0,
+                exp: "正極(空気極)には酸素(O₂)が供給され、電解質を通ってきたH⁺と導線からの電子を受け取り、水(H₂O)が生成されます。"
+            },
+            {
+                q: "水素と酸素を用いた燃料電池で起こる、電池全体の反応式として正しいものは？",
+                options: ["2H₂ + O₂ → 2H₂O", "H₂ + O₂ → H₂O₂", "2H₂O → 2H₂ + O₂", "H⁺ + OH⁻ → H₂O"],
+                ans: 0,
+                exp: "負極で水素が酸化され、正極で酸素が還元される結果、全体としては水素と酸素が反応して水が生成する反応(水素の燃焼反応と同じ)になります。"
+            },
+            {
+                q: "電池において、電子(e⁻)が流れ出す極(酸化反応が起こる極)を何と呼ぶ？",
+                options: ["正極", "負極", "陽極", "陰極"],
+                ans: 1,
+                exp: "電池(放電時)において電子が流れ出す極を負極と呼びます。負極では常に電子を失う「酸化反応」が起こっています。"
+            },
+            {
+                q: "電池において、電子(e⁻)が入り込む極(還元反応が起こる極)を何と呼ぶ？",
+                options: ["正極", "負極", "陽極", "陰極"],
+                ans: 0,
+                exp: "電池(放電時)において電子が入り込む極を正極と呼びます。正極では常に電子を受け取る「還元反応」が起こっています。"
+            }
+        ];
+
+        let currentQuestions = [];
+        let currentQIndex = 0;
+        const MAX_QUESTIONS = 5;
+        let startTime = 0;
+        
+        function showQuizStart() {
+            document.getElementById('quiz-start-screen').style.display = 'block';
+            document.getElementById('quiz-play-screen').style.display = 'none';
+            document.getElementById('quiz-result-screen').style.display = 'none';
+            
+            document.getElementById('display-highscore-score').innerText = AppState.highScore.score;
+            document.getElementById('display-highscore-detail').innerText = `正答: ${AppState.highScore.correctCount}/${MAX_QUESTIONS}問 | タイム: ${AppState.highScore.totalTime.toFixed(1)}秒`;
+        }
+
+        function startQuiz() {
+            // 問題をシャッフルして5問だけ抽出
+            currentQuestions = [...QuizData].sort(() => Math.random() - 0.5).slice(0, MAX_QUESTIONS);
+            currentQIndex = 0;
+            AppState.currentPlay = { score: 0, correctCount: 0, totalTime: 0 };
+
+            document.getElementById('quiz-start-screen').style.display = 'none';
+            document.getElementById('quiz-result-screen').style.display = 'none';
+            document.getElementById('quiz-play-screen').style.display = 'flex';
+            
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const q = currentQuestions[currentQIndex];
+            document.getElementById('quiz-progress').innerText = `${currentQIndex + 1}/${MAX_QUESTIONS}`;
+            document.getElementById('quiz-current-score').innerText = AppState.currentPlay.score;
+            document.getElementById('quiz-question').innerText = q.q;
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            // 解説エリアを隠す
+            document.getElementById('quiz-explanation-area').style.display = 'none';
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 font-medium py-4 px-6 rounded-xl transition-colors duration-200";
+                btn.innerHTML = `<span class="inline-block w-8 font-bold text-slate-400">${index+1}.</span> ${opt}`;
+                btn.onclick = () => handleAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // タイマー開始
+            startTime = Date.now();
+        }
+
+        function handleAnswer(selectedIndex, btnElement) {
+            // 解答時間を計算(秒)
+            const timeTaken = (Date.now() - startTime) / 1000;
+            AppState.currentPlay.totalTime += timeTaken;
+
+            // 全ボタン無効化
+            const optionsContainer = document.getElementById('quiz-options');
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+
+            const q = currentQuestions[currentQIndex];
+            const isCorrect = (selectedIndex === q.ans);
+
+            if (isCorrect) {
+                btnElement.classList.remove('bg-slate-50', 'border-slate-200');
+                btnElement.classList.add('bg-green-100', 'border-green-500', 'text-green-800', 'font-bold');
+                
+                AppState.currentPlay.correctCount++;
+                // スコア計算: 基本点50点 + タイムボーナス(最大50点, 25秒で0点になるペース)
+                const baseScore = 50;
+                const timeBonus = Math.max(0, 50 - Math.floor(timeTaken * 2));
+                AppState.currentPlay.score += (baseScore + timeBonus);
+            } else {
+                btnElement.classList.remove('bg-slate-50', 'border-slate-200');
+                btnElement.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                // 正解を目立たせる
+                buttons[q.ans].classList.remove('bg-slate-50', 'border-slate-200');
+                buttons[q.ans].classList.add('bg-green-50', 'border-green-500', 'text-green-800');
+            }
+
+            document.getElementById('quiz-current-score').innerText = AppState.currentPlay.score;
+
+            // 解説を表示
+            document.getElementById('quiz-explanation-text').innerText = q.exp;
+            document.getElementById('quiz-explanation-area').style.display = 'block';
+        }
+
+        function nextQuiz() {
+            currentQIndex++;
+            if (currentQIndex < currentQuestions.length) {
+                renderQuiz();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            document.getElementById('quiz-play-screen').style.display = 'none';
+            const resultScreen = document.getElementById('quiz-result-screen');
+            resultScreen.style.display = 'block';
+
+            const scoreDisplay = document.getElementById('result-score');
+            const correctDisplay = document.getElementById('result-correct');
+            const timeDisplay = document.getElementById('result-time');
+            const msgDisplay = document.getElementById('result-message');
+            
+            scoreDisplay.innerText = AppState.currentPlay.score;
+            correctDisplay.innerText = AppState.currentPlay.correctCount;
+            timeDisplay.innerText = AppState.currentPlay.totalTime.toFixed(1);
+            
+            const score = AppState.currentPlay.score;
+            // 満点は 100点 × 5問 = 500点
+            if (score >= 450) {
+                msgDisplay.innerText = "パーフェクト！スピードも正確さも素晴らしいです！";
+                msgDisplay.className = "text-xl font-bold mb-6 text-orange-500";
+            } else if (score >= 300) {
+                msgDisplay.innerText = "よくできました！さらにタイムアップを目指しましょう。";
+                msgDisplay.className = "text-xl font-bold mb-6 text-blue-600";
+            } else {
+                msgDisplay.innerText = "アニメーションを見直して復習してみましょう。";
+                msgDisplay.className = "text-xl font-bold mb-6 text-slate-600";
+            }
+
+            // ハイスコア更新判定
+            let isNewHigh = false;
+            if (AppState.currentPlay.score > AppState.highScore.score) {
+                isNewHigh = true;
+            } else if (AppState.currentPlay.score === AppState.highScore.score && AppState.currentPlay.score > 0) {
+                // スコアが同点の場合は、タイムが短い方をハイスコアとする
+                if (AppState.currentPlay.totalTime < AppState.highScore.totalTime) {
+                    isNewHigh = true;
+                }
+            }
+
+            if (isNewHigh) {
+                AppState.highScore = { ...AppState.currentPlay };
+            }
+        }
+
+        // --- 初期化 ---
+        window.onload = () => {
+            resizeCanvas();
+            changeBatteryType('daniel'); // UIと状態の初期同期
+            animate(); // アニメーション開始
+        };
+
+    </script>
+</body>
+</html>
