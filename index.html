@@ -74,11 +74,11 @@
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
                             <input type="radio" name="batteryType" value="fuel_phosphoric" class="w-4 h-4 text-blue-600" onchange="changeBatteryType('fuel_phosphoric')">
-                            <span class="font-medium">燃料電池 (リン酸型) (一次電池)</span>
+                            <span class="font-medium">燃料電池 (リン酸型)</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
                             <input type="radio" name="batteryType" value="fuel_alkali" class="w-4 h-4 text-blue-600" onchange="changeBatteryType('fuel_alkali')">
-                            <span class="font-medium">燃料電池 (アルカリ型) (一次電池)</span>
+                            <span class="font-medium">燃料電池 (アルカリ型)</span>
                         </label>
                     </div>
                 </div>
@@ -228,7 +228,7 @@
 
         </section>
     </main>
-    <footer class="app-footer"> ver.1.0.0 </footer>
+    <footer class="app-footer"> ver.1.0.1 </footer>
     <!-- アプリケーションロジック -->
     <script>
         // --- 状態管理 ---
@@ -271,6 +271,9 @@
                 AppState.action = 'discharge'; // 強制的に放電に戻す
                 btnCharge.disabled = true;
                 btnCharge.className = "flex-1 py-2 font-bold bg-slate-100 text-slate-400 cursor-not-allowed transition";
+                notice.innerText = type.startsWith('fuel')
+                    ? "※燃料電池は、一次電池・二次電池とは別の種類の電池です。充電はせず、燃料の水素(H₂)と酸素(O₂)を外部から供給し続けることで発電します。"
+                    : "※一次電池のため充電できません。";
                 notice.style.display = 'block';
                 updateActionButtons();
             } else {
